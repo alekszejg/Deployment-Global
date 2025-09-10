@@ -31,7 +31,10 @@ services:
           max-size: "10m"
           max-file: "3"
       networks:
-        - local
+        - nginx_certbot_net
+        - api_net
+        - neocall_net
+        
 
   # TEMPORARILY DISABLED till new service 
   #certbot_once:
@@ -52,7 +55,8 @@ services:
   #      max-size: "10m"
   #      max-file: "3"
   #  networks:
-  #    - local
+  #    - nginx_certbot_net
+
   
   certbot-cron:
     image: certbot/certbot:latest
@@ -69,5 +73,15 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - local
+      - nginx_certbot_net
+
+networks:
+  nginx_certbot_net:
+    driver: bridge
+    internal: true
+  api_net:
+    external: true
+  neocall_net:
+    external: true
+  
 
