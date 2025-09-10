@@ -77,11 +77,14 @@ services:
 
 networks:
   nginx_certbot_net:
+    name: nginx_certbot_net
     driver: bridge
     internal: true
   api_net:
+    name: api_net
     external: true
   neocall_net:
+    name: neocall_net
     external: true
   
 
