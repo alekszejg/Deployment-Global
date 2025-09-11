@@ -8,7 +8,7 @@ services:
         - "80:80"
         - "443:443"
       volumes:
-        - nginx.conf.template:/nginx.conf.template:ro
+        - ./nginx.conf.template:/nginx.conf.template:ro
         - /opt/certbot/conf:/etc/letsencrypt:ro
         - /opt/certbot/www:/var/www/certbot:rw
         - ../volumes/logs/nginx:/var/log/nginx:rw
