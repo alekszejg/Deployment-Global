@@ -9,8 +9,8 @@ services:
         - "443:443"
       volumes:
         - ./nginx.conf.template:/nginx.conf.template:ro
-        - /opt/certbot/conf:/etc/letsencrypt:ro
-        - /opt/certbot/www:/var/www/certbot:rw
+        - certbot_conf:/etc/letsencrypt:ro
+        - certbot_www:/var/www/certbot:rw
         - ../volumes/logs/nginx:/var/log/nginx:rw
       healthcheck:
         test: ["CMD", "nginx", "-t"]
@@ -23,8 +23,8 @@ services:
         - MANGOPOST_API_DOMAIN=${MANGOPOST_API_DOMAIN}
         - IP=${IP}
       command: >
-        sh -c "envsubst '$$IP $$DOMAIN'
-        < /nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
+        sh -c "envsubst '$$IP $$MANGOPOST_API_DOMAIN'
+        <. /nginx.conf.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
       logging:
         driver: json-file
         options:
@@ -35,35 +35,12 @@ services:
         - api_net
         - neocall_net
         
-
-  # TEMPORARILY DISABLED till new service 
-  #certbot_once:
-  #  image: certbot/certbot:latest
-  #  volumes:
-  #    - /opt/certbot/conf:/etc/letsencrypt:rw
-  #    - /opt/certbot/www:/var/www/certbot:rw
-  #  command: >
-  #    certonly --webroot --webroot-path=/var/www/certbot
-  #    --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email
-  #    -d neocall.ai
-  #  depends_on:
-  #  - neocall_front
-  #  - neocall_back
-  #  logging:
-  #    driver: json-file
-  #    options:
-  #      max-size: "10m"
-  #      max-file: "3"
-  #  networks:
-  #    - nginx_certbot_net
-
-  
   certbot-cron:
     image: certbot/certbot:latest
     container_name: certbot_cron
     volumes:
-      - /opt/certbot/conf:/etc/letsencrypt:rw
-      - /opt/certbot/www:/var/www/certbot:rw
+      - certbot_conf:/etc/letsencrypt:rw
+      - certbot_www:/var/www/certbot:rw
     depends_on:
       - nginx
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/certbot; docker exec nginx nginx -s reload; sleep 7d; done'"
@@ -86,5 +63,9 @@ networks:
   neocall_net:
     name: neocall_net
     external: true
+
+volumes:
+  certbot_conf:
+  certbot_www:
   
 

@@ -1,0 +1,27 @@
+- ? Move potentially useful .env: => repo settings > Secrets and variables > Actions
+- Ref .env variables in workflow: ${{ secrets.<VARIABLE> }}
+
+??? ssh-keygen -t ed25519 -C "deploy@project"
+
+- Generate SSH keys: ssh-keygen -t ed25519 -C "deploy@project". Rotate keys every 3-6 months
+- SSH Public key: add it to ~/.ssh/authorized_keys or make new folder
+- SSH Private key: add SSH_HOST, SSH_USERNAME, SSH_PRIVATE_KE => repo settings > Secrets and variables > Actions
+- Create deploy user: may access /home/projects/ & may write to /home/projects/<project1-3>
+
+- Run: docker volume create certbot_conf
+- Run: docker volume create certbot_www
+- Copy conf data: docker run --rm -v /opt/certbot/conf:/source -v certbot_conf:/target \ busybox cp -a /source/. /target/
+- Copy www data: docker run --rm -v /opt/certbot/www:/source -v certbot_www:/target busybox cp -a /source/. /target/
+- Verify copy success: docker run -it --rm -v certbot_conf:/data busybox ls /data
+- ! If copies messed up ownerships: docker run -it --rm -v certbot_conf:/data busybox chown -R <user>:<group> /data 
+- ? Remove old bind mount folders
+
+- Edit docker-compose.yml Nginx volume: /opt/certbot/conf: => certbot_conf:/etc/letsencrypt:ro
+- Edit docker-compose.yml Nginx volume: /opt/certbot/www: => certbot_www:/var/www/certbot:rw
+- Edit docker-compose.yml Certbot volume: /opt/certbot/conf: => certbot_conf:/etc/letsencrypt:ro
+- Edit docker-compose.yml Certbot volume: /opt/certbot/www: => certbot_www:/var/www/certbot:rw
+- Edit docker-compose.yml: add volumes: \n certbot_conf: \n certbot_www:
+
+- Stop services: docker-compose down
+- ? Remove old containers: docker ps -a => docker rm nginx certbot_cron
+- Start services: docker compose up -d
