@@ -64,4 +64,4 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: 'Deployment failed! Check logs.'
-            })  # Or integrate Slack/email
+            })  # Or integrate Slack//email
